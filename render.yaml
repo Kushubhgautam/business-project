@@ -3,9 +3,11 @@ services:
     name: fixnear
     runtime: node
     plan: free
-    buildCommand: npm install -g pnpm && pnpm install --dangerously-allow-all-builds && pnpm run build
-    startCommand: pnpm start
+    buildCommand: corepack enable && pnpm install --dangerously-allow-all-builds && pnpm run build
+    startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
+      - key: NODE_VERSION
+        value: 24.14.0
       - key: NODE_ENV
         value: production
       - key: PORT
