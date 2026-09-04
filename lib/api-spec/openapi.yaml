@@ -1,0 +1,336 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: FixNear service marketplace API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: marketplace
+  - name: bookings
+  - name: dashboard
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [marketplace]
+      summary: List service categories
+      responses:
+        "200":
+          description: Service categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+  /providers:
+    get:
+      operationId: listProviders
+      tags: [marketplace]
+      summary: Search nearby providers
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/Location"
+        - $ref: "#/components/parameters/Verified"
+      responses:
+        "200":
+          description: Matching providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Provider"
+  /providers/{providerId}:
+    get:
+      operationId: getProvider
+      tags: [marketplace]
+      summary: Get provider profile
+      parameters:
+        - $ref: "#/components/parameters/ProviderId"
+      responses:
+        "200":
+          description: Provider profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderDetail"
+        "404":
+          description: Provider not found
+  /bookings:
+    get:
+      operationId: listBookings
+      tags: [bookings]
+      summary: List current customer bookings
+      responses:
+        "200":
+          description: Bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+    post:
+      operationId: createBooking
+      tags: [bookings]
+      summary: Create a service booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingInput"
+      responses:
+        "201":
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+  /bookings/{bookingId}/status:
+    patch:
+      operationId: updateBookingStatus
+      tags: [bookings]
+      summary: Advance a booking status
+      parameters:
+        - $ref: "#/components/parameters/BookingId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingStatusInput"
+      responses:
+        "200":
+          description: Updated booking
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary
+      responses:
+        "200":
+          description: Dashboard metrics and activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [dashboard]
+      summary: List current user notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+components:
+  parameters:
+    Search:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+    Category:
+      name: category
+      in: query
+      required: false
+      schema:
+        type: string
+    Location:
+      name: location
+      in: query
+      required: false
+      schema:
+        type: string
+    Verified:
+      name: verified
+      in: query
+      required: false
+      schema:
+        type: boolean
+    ProviderId:
+      name: providerId
+      in: path
+      required: true
+      schema:
+        type: string
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+    Category:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        icon: { type: string }
+        count: { type: number }
+        accent: { type: string }
+      required: [id, name, icon, count, accent]
+    Provider:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        title: { type: string }
+        avatar: { type: string }
+        verified: { type: boolean }
+        rating: { type: number }
+        reviewCount: { type: number }
+        experience: { type: string }
+        startingPrice: { type: number }
+        distance: { type: string }
+        availability: { type: string }
+        category: { type: string }
+        location: { type: string }
+        completedJobs: { type: number }
+        tags:
+          type: array
+          items: { type: string }
+      required: [id, name, title, avatar, verified, rating, reviewCount, experience, startingPrice, distance, availability, category, location, completedJobs, tags]
+    ProviderService:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        duration: { type: string }
+        price: { type: number }
+      required: [name, description, duration, price]
+    ProviderReview:
+      type: object
+      properties:
+        author: { type: string }
+        rating: { type: number }
+        text: { type: string }
+        date: { type: string }
+        avatar: { type: string }
+      required: [author, rating, text, date, avatar]
+    ProviderDetail:
+      allOf:
+        - $ref: "#/components/schemas/Provider"
+        - type: object
+          properties:
+            about: { type: string }
+            services:
+              type: array
+              items: { $ref: "#/components/schemas/ProviderService" }
+            portfolio:
+              type: array
+              items: { type: string }
+            reviews:
+              type: array
+              items: { $ref: "#/components/schemas/ProviderReview" }
+            availableDates:
+              type: array
+              items: { type: string }
+          required: [about, services, portfolio, reviews, availableDates]
+    BookingInput:
+      type: object
+      properties:
+        providerId: { type: string }
+        service: { type: string }
+        date: { type: string }
+        time: { type: string }
+        address: { type: string }
+        problem: { type: string }
+        paymentMethod: { type: string }
+      required: [providerId, service, date, time, address, problem, paymentMethod]
+    Booking:
+      type: object
+      properties:
+        id: { type: string }
+        providerId: { type: string }
+        providerName: { type: string }
+        providerTitle: { type: string }
+        providerAvatar: { type: string }
+        service: { type: string }
+        date: { type: string }
+        time: { type: string }
+        address: { type: string }
+        problem: { type: string }
+        paymentMethod: { type: string }
+        serviceFee: { type: number }
+        platformFee: { type: number }
+        total: { type: number }
+        status: { type: string }
+        eta: { type: string }
+        createdAt: { type: string }
+      required: [id, providerId, providerName, providerTitle, providerAvatar, service, date, time, address, problem, paymentMethod, serviceFee, platformFee, total, status, eta, createdAt]
+    BookingStatusInput:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [requested, accepted, on_the_way, started, completed, cancelled]
+      required: [status]
+    DashboardSummary:
+      type: object
+      properties:
+        activeBooking: { $ref: "#/components/schemas/Booking" }
+        upcomingBooking: { $ref: "#/components/schemas/Booking" }
+        completedServices: { type: number }
+        totalSpending: { type: number }
+        savedProfessionals: { type: number }
+        monthlySpending:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+        serviceUsage:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChartPoint"
+      required: [activeBooking, upcomingBooking, completedServices, totalSpending, savedProfessionals, monthlySpending, serviceUsage]
+    ChartPoint:
+      type: object
+      properties:
+        label: { type: string }
+        value: { type: number }
+      required: [label, value]
+    Notification:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        body: { type: string }
+        time: { type: string }
+        read: { type: boolean }
+        type: { type: string }
+      required: [id, title, body, time, read, type]

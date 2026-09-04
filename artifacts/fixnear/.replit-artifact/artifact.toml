@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "FixNear"
+description = "A polished local-service marketplace connecting customers with verified nearby professionals for repairs, home services, learning, fitness, and everyday needs."
+version = "1.0.0"
+id = "artifacts/fixnear"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25820
+
+[services.development]
+run = "pnpm --filter @workspace/fixnear run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/fixnear", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/fixnear/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25820"
+BASE_PATH = "/"

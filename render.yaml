@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: fixnear
+    runtime: node
+    plan: free
+    buildCommand: npm install -g pnpm && pnpm install --dangerously-allow-all-builds && pnpm run build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
