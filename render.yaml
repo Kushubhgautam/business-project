@@ -3,7 +3,7 @@ services:
     name: fixnear
     runtime: node
     plan: free
-    buildCommand: corepack enable && pnpm install --dangerously-allow-all-builds && pnpm run build
+    buildCommand: (corepack enable 2>/dev/null || true) && pnpm install && pnpm run build
     startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
       - key: NODE_VERSION

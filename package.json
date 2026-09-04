@@ -1,6 +1,7 @@
 {
   "name": "workspace",
   "version": "0.0.0",
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
     "start": "node artifacts/api-server/dist/index.mjs",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
