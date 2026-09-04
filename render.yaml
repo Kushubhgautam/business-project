@@ -3,12 +3,10 @@ services:
     name: fixnear
     runtime: node
     plan: free
-    buildCommand: (corepack enable 2>/dev/null || true) && pnpm install && pnpm run build
+    buildCommand: pnpm install --prod=false && pnpm run build
     startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
       - key: NODE_VERSION
         value: 24.14.0
-      - key: NODE_ENV
-        value: production
       - key: PORT
         value: 10000
