@@ -37,11 +37,11 @@ app.use("/api", router);
 const publicDir = path.resolve(process.cwd(), "artifacts/fixnear/dist/public");
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) {
-      return next();
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api")) {
+      return res.sendFile(path.join(publicDir, "index.html"));
     }
-    res.sendFile(path.join(publicDir, "index.html"));
+    next();
   });
 }
 
